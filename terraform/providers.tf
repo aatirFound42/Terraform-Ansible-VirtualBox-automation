@@ -13,7 +13,7 @@ terraform {
   }
 }
 
-# provider "virtualbox" {
-#   delay      = 60  # Seconds to wait for the VM to boot before attempting connection
-#   mintimeout = 5
-# }
+provider "virtualbox" {
+  delay      = 60  # Seconds to wait for the VM to boot before attempting connection
+  mintimeout = 5
+}
