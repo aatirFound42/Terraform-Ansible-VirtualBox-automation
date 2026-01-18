@@ -1,0 +1,102 @@
+# ansible/playbook.yml
+---
+- name: Phase 1 - Provision Python CI/CD App
+  hosts: cicd_nodes
+  become: true  # Run tasks as root (sudo)
+  vars:
+    project_repo: "https://github.com/aatirFound42/python-cicd-4localServers-withTools.git"
+    project_dest: "/opt/python-cicd-app"
+    docker_compose_version: "v2.21.0"
+
+  tasks:
+    # -------------------------------------------------------
+    # 1. System Preparation
+    # -------------------------------------------------------
+    - name: Update APT cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install base dependencies
+      apt:
+        name:
+          - git
+          - curl
+          - apt-transport-https
+          - ca-certificates
+          - software-properties-common
+          - python3-pip
+          - python3-venv
+        state: present
+
+    # -------------------------------------------------------
+    # 2. Docker Engine Installation
+    # We use the official Docker repo for the latest version.
+    # -------------------------------------------------------
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu jammy stable
+        state: present
+
+    - name: Install Docker CE
+      apt:
+        name: docker-ce
+        state: latest
+
+    - name: Enable and Start Docker Service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add 'vagrant' user to docker group
+      user:
+        name: vagrant
+        groups: docker
+        append: yes
+      # Note: This allows docker commands without sudo
+
+    # -------------------------------------------------------
+    # 3. Application Deployment
+    # -------------------------------------------------------
+    - name: Clone Project Repository
+      git:
+        repo: "{{ project_repo }}"
+        dest: "{{ project_dest }}"
+        version: main
+        force: yes
+
+    # -------------------------------------------------------
+    # 4. Container Build & Launch
+    # We assume the repo has a Dockerfile. If not, we could
+    # dynamically create one here using the copy module.
+    # -------------------------------------------------------
+    - name: Install Python Docker SDK
+      pip:
+        name: docker
+        # Required for the ansible docker_image module
+    
+    - name: Build Application Image
+      docker_image:
+        name: python-cicd-app
+        build:
+          path: "{{ project_dest }}"
+          source: build
+        source: build
+        state: present
+
+    - name: Run Application Container
+      docker_container:
+        name: python-app-instance
+        image: python-cicd-app
+        state: started
+        restart_policy: always
+        ports:
+          - "5000:5000" # Expose Flask port
+        env:
+          FLASK_ENV: development
