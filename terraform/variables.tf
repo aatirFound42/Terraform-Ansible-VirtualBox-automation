@@ -1,5 +1,11 @@
 # terraform/variables.tf
 
+variable "vm_count" {
+  description = "Number of VM nodes to create"
+  type        = number
+  default     = 1
+}
+
 variable "vm_name" {
   description = "The hostname for the CI/CD node"
   type        = string
@@ -22,7 +28,7 @@ variable "image_url" {
   description = "URL to the Vagrant box image"
   type        = string
   # Using custom made image
-  default     = "./template_vm.box"
+  default     = "./guestNodeTemplate.box"
 }
 
 variable "host_network_interface" {
