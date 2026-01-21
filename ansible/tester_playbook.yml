@@ -1,0 +1,16 @@
+- name: Ensure Google Chrome is installed on the Host
+  hosts: localhost
+  connection: local
+  become: yes
+  tasks:
+    - name: Download Google Chrome.deb
+      get_url:
+        url: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        dest: /tmp/google-chrome-stable_current_amd64.deb
+      when: ansible_os_family == "Debian"
+
+    - name: Install Google Chrome
+      apt:
+        deb: /tmp/google-chrome-stable_current_amd64.deb
+        state: present
+      when: ansible_os_family == "Debian"

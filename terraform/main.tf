@@ -32,7 +32,7 @@ resource "virtualbox_vm" "node" {
 resource "local_file" "ansible_inventory" {
   content = templatefile("${path.module}/inventory.tftpl", {
     # We grab the IP from the second adapter (index 1) which is Host-Only
-    ip_addr = element(virtualbox_vm.node.*.network_adapter.1.ipv4_address, 0),
+    ip_addrs = virtualbox_vm.node.*.network_adapter.1.ipv4_address,
     ssh_key = "~/.vagrant.d/insecure_private_key" 
   })
   filename = "${path.module}/../ansible/inventory.ini"
