@@ -9,7 +9,7 @@ variable "vm_count" {
 variable "vm_name" {
   description = "The hostname for the CI/CD node"
   type        = string
-  default     = "python-cicd-node-default"
+  default     = "node"
 }
 
 variable "cpus" {

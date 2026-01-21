@@ -39,3 +39,6 @@ terraform.rc
 
 # image files
 *.box
+
+# ansible files
+*.ini
